@@ -1,7 +1,7 @@
 # brainf-ck-haskell
 A brainf*ck interpreter created using haskell
 
-Usage:
+## Usage:
 
 ```runhaskell project.hs <filename.bf>```
 
