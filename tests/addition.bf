@@ -1,3 +1,5 @@
+[Simple addition of two numbers, from wikipedia: https://en.wikipedia.org/wiki/Brainfuck]
+
 ++       Cell c0 = 2
 > +++++  Cell c1 = 5
 
@@ -23,4 +25,4 @@ We use a loop to compute 48 = 6 * 8
 ++
 [>+++++<-]
 >
-.
+.          Print newline

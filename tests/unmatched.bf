@@ -1,8 +1,8 @@
-++++++++++[>++++++<-]>+++++. 
-- Wont print since unmatched brackets are caught in compile time
+[Because unmatched brackets are caught during parsing, the program won't run if unmatched brackets are found.]
+
+++++++++++[>++++++<-]>+++++.    - A will not print
 >        
 [<+>-]   
 ++++ ++++ 
 [<+++ +++>-]
 ]                             
-- Unmatched, should fail
