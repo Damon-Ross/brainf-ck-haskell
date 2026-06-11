@@ -1,4 +1,4 @@
-# brainf-ck-haskell
+# brainf*ck-haskell
 A brainf*ck interpreter created using haskell
 
 ---
@@ -62,7 +62,7 @@ The architecture of the implementation is divided into three phases:
 - **Memory Simulation:** Simulates an "infinite" storage tape with the active pointer
 - **Evaluation** Takes a parsed program and excecutes each command/loop
 
-#### Parsing 
+### Parsing 
 
 The parser recurses over the string, taking each individual command and identifying and seperating loops into standalone blocks.
 
@@ -77,7 +77,7 @@ type Program = [Instruction]
 
 ```Block [Inst]``` represents a loop block. Recursively wraps a nested child program
 
-#### Data Tape
+### Data Tape
 
 This implementation utilises a List Zipper to track the memory and the active cell in constant time.
 
@@ -105,7 +105,7 @@ Corresponding Tape:
 ```
 
 
-#### Evaluating
+### Evaluating
 
 The evaluator handles lists of instructions sequentially. It evaluates the current instruction, returns the updated tape and passes this to the remaining recursive evaluators.
 
@@ -113,7 +113,7 @@ When evaluating a ```Block innerProgram```, the current focus is checked if it i
 
 ---
 
-### Error handling
+## Error handling
 
 The interpreter is able to catch the following:
 
