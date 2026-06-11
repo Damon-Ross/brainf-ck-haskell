@@ -2,9 +2,9 @@ import Data.Char
 import System.Environment (getArgs)
 import System.IO
 
+
 -- Tape data structure + operations
 data Tape = Tape [Int] Int [Int]
-    deriving (Show)
 
 emptyTape :: Tape
 emptyTape = Tape [] 0 (repeat 0)
@@ -28,6 +28,14 @@ setFocus n (Tape left _ right) = Tape left (abs (n `mod` 256)) right
 getFocus :: Tape -> Int
 getFocus (Tape _ focus _) = focus
 
+instance Show Tape where
+    show :: Tape -> String
+    show (Tape left focus right) =
+        show (reverse left) ++ 
+        "<" ++ show focus ++ ">"
+        ++ show (take 5 right) ++ "..."
+
+
 showTape :: Int -> Tape -> String
 showTape n (Tape left focus right) = 
     show (reverse left) ++ 
@@ -42,29 +50,36 @@ type Program = [Instruction]
 
 -- Parsing logic
 
-parse :: String -> Program
-parse input =
-    prog
-    where (prog, leftovers) = parseLoop input -- By this point the parseLoop would simply produce [] for leftovers
+parse :: String -> Either String Program
+parse input = case parseLoop input of
+    Left error -> Left error
+    Right (program, "") -> Right program
+    Right (_, ']':_) -> Left "Unmatched closing bracket ']'"
+    Right (_, _) -> Left "Parsing error"
 
-parseLoop:: String -> (Program, String) -- Returns parsed intructions and remaining unparsed string. 
-parseLoop [] = ([], "")
+
+parseLoop:: String -> Either String (Program, String) -- Returns parsed intructions and remaining unparsed string. 
+parseLoop [] = Right ([], "")
 
 parseLoop (c:chars)
     -- parsing instruction char
-    | c `elem` "+-><.," =
-        let (rest, leftovers) = parseLoop chars
-        in (Single c : rest, leftovers)
+    | c `elem` "+-><.," = do
+        (rest, leftovers) <- parseLoop chars
+        return (Single c : rest, leftovers)
     
     -- parsing [, starting new block
-    | c == '[' =
-        let (inBlock, afterBlock) = parseLoop chars
-            (rest, leftovers) = parseLoop afterBlock
-        in (Block inBlock : rest, leftovers)
+    | c == '[' = do
+        (inBlock, afterBlock) <- parseLoop chars
+        case afterBlock of
+            (']':afterString) -> do
+                (rest, leftovers) <- parseLoop afterString
+                return (Block inBlock : rest, leftovers)
+            _ -> Left "Unmatched opening bracket '['"
+
     
     -- parsing ], ending block
     | c == ']'=
-        ([], chars)
+        Right ([], c:chars)
     
     | otherwise = parseLoop chars
 
@@ -79,10 +94,10 @@ eval (instruction:rest) tape = do
 
 evalInst :: Instruction -> Tape -> IO Tape
 
-evalInst (Single '+') tape = return (increment tape)
-evalInst (Single '-') tape = return (decrement tape)
-evalInst (Single '<') tape = return (moveLeft tape)
-evalInst (Single '>') tape = return (moveRight tape)
+evalInst (Single '+') tape = return $! (increment tape)
+evalInst (Single '-') tape = return $! (decrement tape)
+evalInst (Single '<') tape = return $! (moveLeft tape)
+evalInst (Single '>') tape = return $! (moveRight tape)
 
 evalInst (Single '.') tape = do
     let currentNumber = getFocus tape
@@ -108,11 +123,18 @@ main = do
     case args of
         [file] -> do
             code <- readFile file
-            let program = parse code
+            case parse code of
+                Left error -> do
+                    putStrLn "----- Parse Error -----"
+                    putStrLn error
 
-            _ <- eval program emptyTape
+                Right program -> do
+                    _ <- eval program emptyTape
+                    return ()
 
             return ()
-        _ -> putStrLn "Usage: project.hs <filename.bf>"
+        _ -> do
+            putStrLn "Usage: project.hs <filename.bf>"
+            putStrLn "Within ghci: :main <filename.bf>"
 
 
